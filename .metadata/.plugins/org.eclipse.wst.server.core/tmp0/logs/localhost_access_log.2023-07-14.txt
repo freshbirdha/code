@@ -1,0 +1,17 @@
+127.0.0.1 - - [14/Jul/2023:14:29:32 +0900] "GET / HTTP/1.1" 404 895
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:14:29:55 +0900] "GET /mvc/ HTTP/1.1" 200 1302
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:14:29:55 +0900] "GET /mvc/plugins/jquery/jquery-3.6.4.min.js HTTP/1.1" 200 89795
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:14:29:55 +0900] "GET /mvc/plugins/bootstrap-4.6.2-dist/css/bootstrap.min.css HTTP/1.1" 200 162264
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:14:29:55 +0900] "GET /mvc/plugins/bootstrap-4.6.2-dist/js/bootstrap.min.js HTTP/1.1" 200 62563
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:14:29:55 +0900] "GET /favicon.ico HTTP/1.1" 404 743
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:14:29:55 +0900] "GET /mvc/api/tags.do HTTP/1.1" 200 -
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:14:30:44 +0900] "GET /mvc/ HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:14:30:44 +0900] "GET /mvc/api/tags.do HTTP/1.1" 200 -
+127.0.0.1 - - [14/Jul/2023:15:29:46 +0900] "GET / HTTP/1.1" 404 895
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:15:29:52 +0900] "GET /mvc/ HTTP/1.1" 200 1323
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:15:29:52 +0900] "GET /mvc/plugins/bootstrap-4.6.2-dist/css/bootstrap.min.css HTTP/1.1" 200 162264
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:15:29:52 +0900] "GET /mvc/plugins/bootstrap-4.6.2-dist/js/bootstrap.min.js HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:15:29:52 +0900] "GET /mvc/api/tags.do HTTP/1.1" 200 -
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:15:29:55 +0900] "GET /mvc/index.do HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:15:29:56 +0900] "GET /mvc/login.jsp HTTP/1.1" 200 363
+0:0:0:0:0:0:0:1 - - [14/Jul/2023:15:30:49 +0900] "GET /mvc/WEB-INF/classes/userAction/TagsAction.java HTTP/1.1" 404 196

@@ -1,0 +1,14 @@
+package demo;
+
+/**
+ * 反射
+ * @author USER
+ *
+ */
+public class Test{
+	
+}
+
+
+
+//实体类:一般用entity表示 或者pojo

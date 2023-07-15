@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!-- 业务控制器 -->
+
+<action>
+	<action path="/index" name="com.banma.action.LoginAction">
+	<result name="success" path="index.jsp"/>
+	<result name= "fail" path="login.jsp"/>
+	</action>
+</action>

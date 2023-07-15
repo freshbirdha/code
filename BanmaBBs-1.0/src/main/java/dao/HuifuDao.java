@@ -1,0 +1,171 @@
+package dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import entity.HuiFu;
+import util.JdbcUtils;
+
+public class HuifuDao {
+	public List<HuiFu> getHuifuByTid(int tid){
+		
+		List<HuiFu> list = new ArrayList<>();
+		try {
+			Connection connection = JdbcUtils.getConnection();
+			String sql = "select * from huifu where tid = ?";
+			PreparedStatement st = connection.prepareStatement(sql);
+			st.setInt(1, tid);
+			ResultSet rSet = st.executeQuery();
+			
+			while(rSet.next()) {
+				HuiFu huiFu = new HuiFu();
+				huiFu.setcontent(rSet.getString("content"));
+				huiFu.setCreateTime(rSet.getTimestamp("createTime"));
+				huiFu.setHid(rSet.getInt("hid"));
+				huiFu.setTid(tid);
+				huiFu.setUid(rSet.getInt("uid"));
+				huiFu.setUpdateTime(rSet.getTimestamp("updateTime"));
+				list.add(huiFu);
+			}
+			rSet.close();
+			st.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+		
+	}
+
+	public HuiFu getHuiFuByHid(int hid) {
+
+		HuiFu huifu = null;
+		try {
+			Connection connection = JdbcUtils.getConnection();
+			String sql = "select * from huifu where hid = ?";
+			PreparedStatement st = connection.prepareStatement(sql);
+			st.setInt(1, hid);
+			ResultSet rSet = st.executeQuery();
+			
+			while(rSet.next()) {
+				huifu = new HuiFu();
+				
+				huifu.setcontent(rSet.getString("content"));
+				huifu.setCreateTime(rSet.getTimestamp("createTime"));
+				huifu.setHid(hid);
+				huifu.setTid(rSet.getInt("tid"));
+				huifu.setUid(rSet.getInt("uid"));
+				huifu.setUpdateTime(rSet.getTimestamp("upsateTime"));
+			}
+			rSet.close();
+			st.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return huifu;
+		
+	}
+	
+    public long addHuifu(HuiFu huifu) {
+    	try {
+			Connection connection = JdbcUtils.getConnection();
+			
+			String sql =  "insert huifu (content,tid,uid,createTime,updateTime) values (?,?,?,?,?)";
+			PreparedStatement st = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+			
+			java.util.Date date = new java.util.Date();
+			java.sql.Timestamp daTimestamp = new java.sql.Timestamp(date.getTime());
+			
+			st.setString(1, huifu.getcontent());
+			st.setInt(2, huifu.getTid());
+			st.setInt(3, huifu.getUid());
+			st.setTimestamp(4, daTimestamp);
+			st.setTimestamp(5, daTimestamp);
+		
+			int cnt = st.executeUpdate();
+			
+			
+			if(cnt != 1) {
+				return -1;
+			}
+			
+			try {
+				ResultSet generatedKeys = st.getGeneratedKeys();
+	            if (generatedKeys.next()) {
+	            	long tid = generatedKeys.getLong(1);
+	            	st.close();
+	                return tid;
+	            }
+	            else {
+	                return -1;
+	            }
+	        }catch (Exception e) {
+				return -1;
+			}
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;		
+    }
+
+    
+    public boolean updateHuifu(HuiFu huifu) {
+		try {
+			Connection connection = JdbcUtils.getConnection();
+			
+			String sql =  "update huifu set content=?,updateTime=? where hid=?";
+			PreparedStatement st = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+			java.util.Date date = new java.util.Date();
+			java.sql.Timestamp daTimestamp = new java.sql.Timestamp(date.getTime());
+			
+			st.setString(1, huifu.getcontent());
+			st.setTimestamp(2, daTimestamp);
+			st.setInt(3,huifu.getHid());
+			
+			
+			
+			int cnt = st.executeUpdate();
+			
+			
+			if(cnt != 1) {
+				return false;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return true;	
+		
+		
+	}
+
+    public boolean delete(int hid) {
+		
+		try {
+			Connection connection = JdbcUtils.getConnection();
+			
+			String sql =  "delete from huifu where hid=?";
+		
+			PreparedStatement st = connection.prepareStatement(sql);
+			st.setInt(1, hid);
+
+			int cnt = st.executeUpdate();		
+			if(cnt != 1) {
+				return false;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return true;	
+		
+		
+	}
+
+}

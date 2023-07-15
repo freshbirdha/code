@@ -1,0 +1,9 @@
+package bean;
+
+import annotation.Column;
+
+public class Tags {
+	@Column(isId = true, value = "" )
+	private int id;
+	
+}

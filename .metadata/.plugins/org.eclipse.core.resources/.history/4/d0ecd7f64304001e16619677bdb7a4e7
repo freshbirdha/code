@@ -1,0 +1,28 @@
+package reflection;
+
+import org.junit.Test;
+
+public class TestDemo1 {
+
+	public static void main(String[] args) throws Exception {
+		//获取Class类
+		Class c1 = Person.class;
+		Class c2 = new Person().getClass();
+		Class c3 = Class.forName("reflection.Person");
+	}
+	
+	
+	//操作无参构造方法
+	@Test
+	public void test1()throws Exception{
+		//得到Class
+		Class c3 = Class.forName("reflection.Person");
+		//得到Person类的实例
+		Person person = (Person) c3.newInstance();
+		//设置值
+		person.setNameString("lisi");
+		System.out.println(person.getNameString());
+	}
+	
+
+}

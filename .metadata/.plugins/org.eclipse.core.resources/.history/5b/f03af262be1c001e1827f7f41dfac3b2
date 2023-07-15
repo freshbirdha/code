@@ -1,0 +1,102 @@
+package servlet;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import dao.BanKuaiDao;
+import dao.HuifuDao;
+import dao.TieziDao;
+import entity.HuiFu;
+import entity.TieZi;
+import entity.User;
+
+/**
+ * Servlet implementation class UpdateHuifuServlet
+ */
+public class UpdateHuifuServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public UpdateHuifuServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String hidstr = request.getParameter("hid");
+		
+		if(hidstr == null || "".equals(hidstr)) {
+			//给予错误提示
+			request.setAttribute("message", "没有对应的回复内容 <a href=\"index\"> 》》》去首页</a>");
+			request.getRequestDispatcher("/WEB-INF/view/error.jsp").forward(request, response);
+			return;
+		}
+		
+		int hid = Integer.valueOf(hidstr);
+		
+		
+		String tidstr = request.getParameter("tid");
+		
+		if(tidstr == null || "".equals(tidstr)) {
+			//给予错误提示
+			request.setAttribute("message", "没有找到您想要的帖子信息 <a href=\"index\"> 》》》去首页</a>");
+			request.getRequestDispatcher("/WEB-INF/view/error.jsp").forward(request, response);
+			return;
+		}
+		
+		int tid = Integer.valueOf(tidstr);
+		
+		HuifuDao huifuDao = new HuifuDao();
+		HuiFu huifu = huifuDao.getHuiFuByHid(hid);
+		
+		if(huifu == null) {
+			//给予错误提示
+			request.setAttribute("message", "您没有修改权限 <a href=\"tiezi?tid="+tid+"\"> 》》》去帖子详情页</a>");
+			request.getRequestDispatcher("/WEB-INF/view/error.jsp").forward(request, response);
+			return;
+		}
+		
+		User loginUser = (User) request.getSession().getAttribute("user");
+		
+		if(loginUser == null) {
+			//给予错误提示
+			request.setAttribute("message", "请先登录 <a href=\"login\"> 》》》去登录</a>");
+			request.getRequestDispatcher("/WEB-INF/view/error.jsp").forward(request, response);
+			return;
+		}
+		
+		//判断发帖人ID是否跟当前登录用户一样，如果一样，给予错误提示，不让修改
+		if(tieZi.getUid() != loginUser.getUid()) {
+			//给予错误提示
+			request.setAttribute("message", "您没有修改权限 <a href=\"tiezi?tid="+tieZi.getTid()+"\"> 》》》去帖子详情页</a>");
+			request.getRequestDispatcher("/WEB-INF/view/error.jsp").forward(request, response);
+			return;
+		}
+		
+		
+		
+		//获取板块信息
+		BanKuaiDao banKuaiDao = new BanKuaiDao();
+		request.setAttribute("bk", banKuaiDao.getBanKuaiById(tieZi.getBid()));
+		
+		request.setAttribute("tiezi", tieZi);
+		request.getRequestDispatcher("/WEB-INF/view/updateTiezi.jsp").forward(request, response);
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		doGet(request, response);
+	}
+
+}

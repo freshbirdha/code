@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>自定义mvc框架</title>
+<script type="text/javascript" src="plugins/jquery/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+<h1>主页</h1>
+<a href="login.jsp">Login</a>
+<a href="regist.jsp">Regist</a>
+<label>商品类型</label>
+<select id="tags" name="tag"></select>
+
+<script type="text/javascript">
+	$(function(){
+		$.ajax("api/tags.do",{
+			success:function(data){
+				alert(data);
+				console.log(data);
+			}
+		})
+	});
+
+</script>
+</body>
+</html>

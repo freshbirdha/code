@@ -1,0 +1,4 @@
+artifactId=mysql-connector-j
+eclipse.preferences.version=1
+groupId=com.mysql
+version=8.0.32

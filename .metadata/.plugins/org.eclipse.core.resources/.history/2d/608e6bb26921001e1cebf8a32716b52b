@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!-- 业务控制器 -->
+
+<actions>
+
+	<!-- 	<action> -->
+	<!-- 	<action path="/login" name="mvc.LoginAction"/> -->
+	<!-- 		<result name="success" path="index.jsp"/> -->
+	<!-- 		<result name= "fail" path="login.jsp"/> -->
+	
+	<!-- 	</action> -->
+	
+	
+	
+	<action path="/index.do" name="userAction.IndexAction">
+	<result name="success" path="index.html"/>
+	<result name= "fail" path="login.jsp" redirect="true"/>
+	</action>
+	
+	<action path="/login.do" name="userAction.LoginAction">
+	<result name="ok" path="index.html"/>
+	<result name= "no" path="login.jsp" />
+	</action>
+	
+</actions>
+
+

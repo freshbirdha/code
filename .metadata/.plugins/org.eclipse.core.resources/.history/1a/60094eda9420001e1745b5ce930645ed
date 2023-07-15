@@ -1,0 +1,146 @@
+package mvcServlet;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import mvcAction.SupportAction;
+import mvcServlet.ActionXmlParser.Action;
+import mvcServlet.ActionXmlParser.Result;
+/**
+ * 自定义mvc框架的核心控制器
+ * @author USER
+ *
+ */
+public class DispatcherServlet extends HttpServlet {
+	
+	private HashMap<String, Action> actions;
+	
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		/**
+		 * 第一次请求会实例化servlet类，同时调用init(servletConfig),
+		 * 如果不调用父类super.init(config)方法,则不会调用无参的方法
+		 */
+		
+		//super.init(config);
+		//System.out.println("init有参");
+		
+		String configPath = config.getInitParameter("config");
+		if(configPath.startsWith("classpath:")) {
+			configPath.replace("classpath:", "");
+			//通过ClassLoader拿到文件输入流
+			InputStream iStream = ClassLoader.getSystemResourceAsStream(configPath);
+			
+			//解析xml
+			try {
+				actions = new ActionXmlParser().parse(iStream);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}finally {
+				try {
+					iStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			
+		}
+	}
+	@Override
+	public void init() throws ServletException {
+			System.out.println("init无参");
+	}
+	
+	@Override
+		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			
+		//1. 读取当前请求的路径,请求包含项目上下文的请求路径
+		String path  = req.getRequestURI();  //返回:/mvc/
+		
+		//2.获取项目路径
+		String basePath =req.getContextPath();
+		
+		path = path.replace(basePath, "");
+		
+		//3.根据请求路径 从配置文件获取到请求处理类
+		
+		Action action = actions.get(path);
+		
+		if(action == null) {//请求资源不存在
+			req.getRequestDispatcher("error.html").forward(req, resp);
+			return;
+		}
+		
+		try {
+			Class<SupportAction> actionCls = (Class<SupportAction>) Class.forName(action.getName());
+			SupportAction sAction =actionCls.newInstance();
+			//向业务控制器中注入request和session
+			Field reqField =actionCls.getDeclaredField("request");
+			reqField.setAccessible(true);
+			
+			reqField.set(sAction, req);
+			
+			Field sessionField =actionCls.getDeclaredField("session");
+			
+			sessionField.setAccessible(true);
+			
+			sessionField.set(sAction, req.getSession());
+			
+			//执行业务控制器类的方法
+			String resultName = sAction.execute();
+			
+			//根据处理方法返回的结果名称，获取<result>标签中的path
+			Result result = action.getResults().get(resultName);
+			
+			String resultPath = result.getPath();
+			if(result.isRedirect()) {
+				resp.sendRedirect(resultPath);
+			}else {
+				req.getRequestDispatcher(resultPath).forward(req, resp);
+			}
+			
+			return;
+			
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+//		if("/".equals(path)) {
+//			req.getRequestDispatcher("index.html").forward(req, resp);
+//			return;
+//		}
+		
+//		if(!path.endsWith(".do")) { //不以do结束 不做任何事情
+//			return;
+//		}
+		
+		
+//		System.out.println("service-http:" + req.getMethod());
+//			
+//		
+//			
+//			System.out.println(path);
+//			resp.setContentType("text/html;charset=utf-8");
+//			resp.getWriter()
+//				.append("<h1>hello DispatcherServlet</h1>")
+//				.append("<ul>")
+//				.append("<li>小明</li>")
+//				.append("<li>小李</li>")
+//				.append("</ul>");
+				
+							
+							
+		}
+	
+}

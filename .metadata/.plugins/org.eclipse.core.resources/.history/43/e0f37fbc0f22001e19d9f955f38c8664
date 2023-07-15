@@ -1,0 +1,46 @@
+package dao;
+
+import java.util.List;
+
+import bean.Tags;
+import databaseOrm.DBSessionFactory.DBSession;
+
+public class TagsDao implements Dao<Tags> {
+
+	private DBSession session;
+	public TagsDao(DBSession session) {
+		this.session = session;
+	}
+	
+	
+	@Override
+	public List<Tags> findAll() {
+		List<Tags> list = null;
+		try {
+			list =session.list(Tags.class);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	@Override
+	public int save(Tags obj) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int update(Tags obj) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int delete(Tags obj) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+}

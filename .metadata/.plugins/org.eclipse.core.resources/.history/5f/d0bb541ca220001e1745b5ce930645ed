@@ -1,0 +1,17 @@
+package userAction;
+
+import mvcAction.SupportAction;
+
+public class LoginAction extends SupportAction {
+	@Override
+	public String execute() {
+		String name = params.get("name");
+		String password = params.get("password");
+		
+		if(("xiaoming").equals(name)||("aaa").equals(name) & "123".equals(password)) {
+			session.setAttribute("username", name);
+			return SUCCESS;
+		}
+		return FAIL;
+	}
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="SmartImportWizard">
+		<item key="SmartImportRootWizardPage.STORE_HIDE_ALREADY_OPEN" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_CLOSE_IMPORTED" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_NESTED_PROJECTS" value="true"/>
+		<item key="SmartImportRootWizardPage.STORE_CONFIGURE_NATURES" value="true"/>
+		<list key="org.eclipse.ui.internal.wizards.datatransfer.SmartImportRootWizardPage.knownSources">
+			<item value="C:\Users\USER\eclipse-workspaceJaveWeb\filebymail"/>
+			<item value="C:\Users\USER\Desktop\jar\JavaWeb视频教程_day19-资料源码\day19_code\day19_3"/>
+			<item value="C:\Users\USER\Desktop\jar\JavaWeb视频教程_day19-资料源码\day19_code\day19_1"/>
+			<item value="C:\Users\USER\Desktop\jar\JavaWeb视频教程_day19-资料源码\day19_code"/>
+			<item value="C:\Users\USER\Desktop\jar\JavaWeb视频教程_day18-资料源码\day18_code\day18_5"/>
+			<item value="C:\Users\USER\eclipse-workspace"/>
+		</list>
+	</section>
+	<section name="ResourceListSelectionDialogSettings">
+		<item key="DIALOG_X_ORIGIN" value="512"/>
+		<item key="DIALOG_Y_ORIGIN" value="8"/>
+		<item key="DIALOG_WIDTH" value="359"/>
+		<item key="DIALOG_HEIGHT" value="568"/>
+		<item key="DIALOG_FONT_NAME" value="1|Yu Gothic UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Yu Gothic UI"/>
+	</section>
+</section>

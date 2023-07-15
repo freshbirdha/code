@@ -1,0 +1,104 @@
+package servlet;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import dao.BanKuaiDao;
+import dao.HuifuDao;
+import dao.TieziDao;
+import dao.UserDao;
+import entity.HuiFu;
+import entity.TieZi;
+import entity.User;
+import vo.HuifuVO;
+import vo.TieziPageVO;
+
+/**
+ * Servlet implementation class TieziServlet
+ */
+public class TieziServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public TieziServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		String tidstr = request.getParameter("tid");
+		
+		
+		if(tidstr == null || "".equals(tidstr)) {
+			//给予错误提示
+			request.setAttribute("message", "没有找到您想要的帖子信息 <a href=\"index\"> 》》》去首页</a>");
+			request.getRequestDispatcher("/WEB-INF/view/error.jsp").forward(request, response);
+			return;
+		}
+		
+		//帖子所属板块信息
+		
+		TieziPageVO vo = new TieziPageVO();
+		int tid = Integer.valueOf(tidstr);
+		
+		//帖子信息
+		TieziDao tieziDao = new TieziDao();
+		
+		TieZi tieZi = tieziDao.getTiezibyTid(tid);
+		
+		vo.setTiezi(tieZi);
+		
+		
+		//获取板块信息
+		BanKuaiDao banKuaiDao = new BanKuaiDao();
+		vo.setBanKuai(banKuaiDao.getBanKuaiById(tieZi.getBid()));
+		
+		//发帖人信息
+	
+		UserDao userDao = new UserDao();
+		User user = userDao.getUserById(tieZi.getUid());
+		
+		vo.setUser(user);
+			
+		request.setAttribute("vo", vo);
+		request.getRequestDispatcher("/WEB-INF/view/tiezi.jsp").forward(request, response);
+		
+	
+		// 获取回复信息
+		HuifuDao huifuDao = new HuifuDao();
+		List<HuiFu> hList = huifuDao.getHuifuByTid(tid);
+		if (hList != null) {
+		    List<HuifuVO> hVos = new ArrayList<>();
+
+		    for (HuiFu huifu : hList) {
+		        HuifuVO hVo = new HuifuVO();
+		        // 根据回复信息中的用户ID获取用户信息
+		        User huser = userDao.getUserById(huifu.getUid());
+		        hVo.setHuifu(huifu);
+		        hVo.setUser(huser);
+		        hVos.add(hVo);
+		    }
+
+		    vo.setList(hVos);
+		}
+
+		// 将 TieziPageVO 对象设置为请求的属性
+		request.setAttribute("vo", vo);
+
+		// 转发请求到 "tiezi.jsp" 文件
+		request.getRequestDispatcher("/WEB-INF/view/tiezi.jsp").forward(request, response);
+	}
+
+
+}

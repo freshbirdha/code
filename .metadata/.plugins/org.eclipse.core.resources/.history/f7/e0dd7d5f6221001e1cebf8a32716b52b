@@ -1,0 +1,44 @@
+package annotation;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+public class Test01 {
+	@MyAnnotation(name = "test") 
+	public void test() {
+		
+	}
+	@MyAnnotation 
+	public void test2() {
+		
+	}
+	@MyAnnotation2("testing") //属性仅有一个且名称为“value”时，可省略
+	public void test3() {
+		
+	}
+}
+//表示注解可以使用在哪个位置（class,方法名）
+@Target(value = {ElementType.METHOD,ElementType.TYPE})
+//表示我们的注解可以用在哪些地方（runtime>class>sources
+@Retention(value = RetentionPolicy.RUNTIME)
+@Documented//表示我们的注解生成在javadoc中
+@Inherited//表示子类可以继承父类的注解
+//自定义一个注解，自动继承annotation接口
+@interface MyAnnotation{
+	//定义注解的参数：类型+名称
+	String name() default "";//如果没设置默认值，必须填写
+	int age() default 0;
+	int id() default -1;
+	
+	String [] school() default {"北京大学"};
+}
+
+@Target(value = {ElementType.METHOD})
+@Retention(value = RetentionPolicy.RUNTIME)
+@interface MyAnnotation2{
+	String value();//一个属性时默认使用value；命名时可直接写明；
+}

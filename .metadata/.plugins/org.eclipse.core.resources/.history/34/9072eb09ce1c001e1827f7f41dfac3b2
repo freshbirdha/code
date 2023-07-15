@@ -1,0 +1,127 @@
+package servlet;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+
+
+import dao.BanKuaiDao;
+import dao.TieziDao;
+import dao.UserDao;
+import entity.BanKuai;
+import entity.TieZi;
+import entity.User;
+import vo.BanKuaiVO;
+import vo.IndexVO;
+import vo.TieziVO;
+
+/**
+ * Servlet implementation class IndexServlet
+ */
+public class IndexServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public IndexServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		IndexVO indexVO = new IndexVO();
+		
+		List<BanKuaiVO> list = new ArrayList<>();
+		BanKuaiDao banKuaiDao = new BanKuaiDao();
+		List<BanKuai> rootBanKuaiList = banKuaiDao.getBanKuaiByPid(0);
+		
+		if(rootBanKuaiList != null) {
+			for (BanKuai banKuai : rootBanKuaiList) {
+				BanKuaiVO banKuaivo = new BanKuaiVO();
+				banKuaivo.setName(banKuai.getName());
+							
+				//继续查询该板块的所有子版块
+				List<BanKuai> cBanKuaiList = banKuaiDao.getBanKuaiByPid(banKuai.getBid());			
+				List<BanKuaiVO> clist = new ArrayList<>();
+				
+				//
+				String pagestr = request.getParameter("page");
+				int page = 0;
+				if(pagestr != null ) {
+					page = Integer.valueOf(pagestr);
+				}
+				
+				
+				if(cBanKuaiList != null) {
+					for (BanKuai cb : cBanKuaiList) {
+						int cbid = cb.getBid();
+						BanKuaiVO cbvo = new BanKuaiVO();
+						cbvo.setName(cb.getName());
+						cbvo.setBid(cbid);
+						//查询改板块的帖子数量
+						TieziDao tieziDao = new TieziDao();
+						
+						//
+						List<TieZi> tList =tieziDao.getTieziByBid(cbid,page);
+						
+						int tieCount = tList == null ? 0 : tList.size();
+						cbvo.setTieziCount(tieCount);
+						if(tieCount > 0) {
+							//查询改板块最后更改的帖子
+							TieZi tieZi =tieziDao.getLastUpdateTieZiByBid(cbid);
+							if(tieZi != null) {
+								TieziVO tVo = new TieziVO();
+								tVo.setTid(tieZi.getTid());
+								tVo.setTitle(tieZi.getTitle());
+								
+								UserDao userDao = new UserDao();
+								User user = userDao.getUserById(tieZi.getUid());
+								if(user != null) {
+									String userName = user.getUsername();
+									tVo.setUserName(userName);															
+								}else {
+									String userName = "未知用户";
+									tVo.setUserName(userName);
+								}
+								
+								tVo.setUpdateTime(tieZi.getUpdateTime());
+								cbvo.setLasTieZi(tVo);
+							
+							
+							}
+							
+							
+						}
+						
+						clist.add(cbvo);
+					}
+				}
+				
+				banKuaivo.setcList(clist);
+				
+				list.add(banKuaivo);
+			}
+		}
+		
+		indexVO.setbVos(list);
+		
+		request.setAttribute("indexVO", indexVO);
+		request.getRequestDispatcher("/WEB-INF/view/index.jsp").forward(request, response);
+		
+		
+	}
+
+	
+
+}

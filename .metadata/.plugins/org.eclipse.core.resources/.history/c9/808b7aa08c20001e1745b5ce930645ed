@@ -1,0 +1,75 @@
+package mvcServlet;
+
+import java.util.List;
+
+/**
+ * 业务控制器xml的解析器
+ * @author USER
+ *
+ */
+
+public class ActionXmlParser {
+	
+	//对应<action>标签
+	public static class Action{
+		private String path;
+		private String name;
+		private List<Result>results;
+		
+		public Action() {
+			super();
+		}
+		public String getPath() {
+			return path;
+		}
+		public void setPath(String path) {
+			this.path = path;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public List<Result> getResults() {
+			return results;
+		}
+		public void setResults(List<Result> results) {
+			this.results = results;
+		}
+		
+	}
+	
+	//对应<result>标签
+	public static class Result{
+		private String name;
+		private String path;
+		private boolean redirect;
+		
+		
+		public Result() {
+			
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public String getPath() {
+			return path;
+		}
+		public void setPath(String path) {
+			this.path = path;
+		}
+		public boolean isRedirect() {
+			return redirect;
+		}
+		public void setRedirect(boolean redirect) {
+			this.redirect = redirect;
+		}
+		
+		
+		
+	}
+}

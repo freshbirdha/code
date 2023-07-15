@@ -1,0 +1,21 @@
+package userAction;
+
+import mvcAction.SupportAction;
+
+public class RegisterAction extends SupportAction {
+	
+	UserDao dao;
+	User user;
+
+	@Override
+	public String execute() {
+		if (dao == null || user == null) {
+			session.setAttribute("error", "12001 请求失败，请与管理员联系！");
+		}
+
+		if (dao.save(user)>0) {
+			return "list";
+		}
+		return "regist";
+	}
+}

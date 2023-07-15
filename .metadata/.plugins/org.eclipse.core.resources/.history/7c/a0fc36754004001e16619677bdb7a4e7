@@ -1,0 +1,21 @@
+package reflection;
+
+public class Person {
+
+	private String nameString;
+	private String idString;
+	
+	//没有参数
+	public Person() {
+		
+	}
+	//有参数的构造方法
+	public Person(String nameString, String idString) {
+		super();
+		this.nameString = nameString;
+		this.idString = idString;
+	}
+	
+	
+
+}

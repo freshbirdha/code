@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<h1>测试请求参数</h1>
+<a href="/servletWebTest/Cservlet?xxx=XXX&yyy=YYY">点击这里</a>
+<hr/>
+<form action="/servletWebTest/Cservlet" method="post">
+用户名:<input type="text" name="username"><br/>
+密码: <input type="password" name="password"><br/>
+爱好:<input type="checkbox" name="hobby" value="soccer">足球
+	<input type="checkbox" name="hobby" value="tennis">网球
+	<input type="checkbox" name="hobby" value="basketball">网球
+	<br/>
+	<input type="submit" value="提交">	
+</form>
+</body>
+</html>

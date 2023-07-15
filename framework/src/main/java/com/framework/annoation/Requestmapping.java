@@ -1,0 +1,14 @@
+package com.framework.annoation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.TYPE,ElementType.METHOD})  //该注解可以在类和方法上使用
+@Retention(RetentionPolicy.RUNTIME) //该注解运行期有效
+
+public @interface Requestmapping {
+	String value() default "";
+}
+ 

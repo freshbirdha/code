@@ -1,0 +1,116 @@
+package servlet;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import dao.BanKuaiDao;
+import dao.HuifuDao;
+import dao.TieziDao;
+import dao.UserDao;
+import entity.HuiFu;
+import entity.TieZi;
+import entity.User;
+import vo.ListPageVO;
+import vo.TieziVO;
+
+/**
+ * Servlet implementation class ListServlet
+ */
+public class ListServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public ListServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String bidstr = request.getParameter("bid");
+		if(bidstr == null || "".equals(bidstr)) {
+			//给予错误提示
+			request.getRequestDispatcher("/WEB-INF/view/listError.jsp").forward(request, response);
+			return;
+		}
+		
+		int bid = Integer.valueOf(bidstr);
+		
+		String pagestr = request.getParameter("page");
+		int page = 1; 
+
+		if (pagestr != null && !pagestr.trim().isEmpty()) {
+		    page = Integer.valueOf(pagestr);
+
+		    if (page <= 0) {
+		        page = 1;
+		    }
+		}
+		
+	
+		
+		ListPageVO vo = new ListPageVO();
+		List<TieziVO> list = new ArrayList<>();
+		
+		TieziDao tieziDao = new TieziDao();
+		UserDao userDao = new UserDao();
+		HuifuDao huifuDao = new HuifuDao();
+		//BanKuai bankuai = new BanKuai();
+		//根据板块id 获取该板块下的所有帖子		
+		List<TieZi> tList =tieziDao.getTieziByBid(bid,page);
+		if(tList != null) {
+			for (TieZi tieZi : tList) {
+				TieziVO tVo = new TieziVO();
+				//查询改帖子的回复数量
+				List<HuiFu> huifuList = huifuDao.getHuifuByTid(tieZi.getTid());
+				int huifuCount = huifuList == null ? 0 : huifuList.size();
+				tVo.setHuifuCount(huifuCount);
+				
+				tVo.setTid(tieZi.getTid());
+				tVo.setTitle(tieZi.getTitle());
+				
+				//查询该帖子的发帖人信息
+				User user = userDao.getUserById(tieZi.getUid());
+				if(user != null) {
+					String userName = user.getUsername();
+					tVo.setUserName(userName);															
+				}else {
+					String userName = "未知用户";
+					tVo.setUserName(userName);
+				}
+				
+				list.add(tVo);
+				
+			}
+		}
+		
+		BanKuaiDao banKuaiDao = new BanKuaiDao();
+		vo.setBanKuai(banKuaiDao.getBanKuaiById(bid));
+		vo.setList(list);
+		request.setAttribute("vo", vo);
+		
+		int prePageIndex = page -1;
+		int nextPageIndex = page + 1;
+		
+		if(prePageIndex < 1) {
+			prePageIndex = 1;
+		}
+		
+		
+		
+		request.setAttribute("prepageIndex", prePageIndex);//上一页的页码
+		request.setAttribute("nextpageIndex", nextPageIndex);//下一页的页码
+		request.getRequestDispatcher("/WEB-INF/view/list.jsp").forward(request, response);
+	}
+
+	
+
+}

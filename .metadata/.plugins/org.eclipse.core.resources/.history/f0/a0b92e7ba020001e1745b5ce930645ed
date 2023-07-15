@@ -1,0 +1,40 @@
+package mvcAction;
+/**
+ * 业务控制器的父类
+ * @author USER
+ *
+ */
+
+
+import java.util.Enumeration;
+import java.util.HashMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+public class SupportAction {
+	protected HttpServletRequest request;
+	protected HttpSession session;
+	
+	protected final String SUCCESS = "success";
+	protected final String FAIL = "fail";
+	protected  HashMap<String, String> params;
+	//业务控制器执行的方法
+	public String execute() {
+		return SUCCESS;
+	}
+	
+	//获取请求参数列表
+	protected HashMap<String, String> getprarams(){
+		
+		params = new HashMap<>();
+		
+		Enumeration<String> paramsNames =request.getParameterNames();
+		
+		while (paramsNames.hasMoreElements()) {
+			String string = (String) paramsNames.nextElement();
+			params.put(string, request.getParameter(string));
+		}
+		return params;
+		
+	}
+}

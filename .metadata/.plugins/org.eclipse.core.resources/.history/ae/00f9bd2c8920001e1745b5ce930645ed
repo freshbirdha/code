@@ -1,0 +1,16 @@
+package mvcAction;
+/**
+ * 业务控制器的父类
+ * @author USER
+ *
+ */
+
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+public class SupportAction {
+	protected HttpServletRequest request;
+	protected HttpSession session;
+
+}

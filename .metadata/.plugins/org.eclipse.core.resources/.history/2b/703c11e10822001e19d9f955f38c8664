@@ -1,0 +1,364 @@
+package databaseOrm;
+
+
+import java.lang.reflect.Field;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import annotation.ORMAnnoHelper;
+import bean.User;
+
+public class DBSessionFactory {
+	private DBSource dbSource;// 数据源
+
+	private Properties props;// 数据源连接的属性
+
+	@SuppressWarnings("unused")
+	public DBSessionFactory() {
+		props = new Properties();
+		try {
+			props.load(DBSessionFactory.class.getClassLoader().getResourceAsStream("dbConfig.properties"));
+//			System.out.println(props.getProperty("driver"));
+			dbSource = new DBSource(props);
+			Connection conn = dbSource.openConnection();
+			System.out.println("---数据库连接成功---");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+//   打开数据库连接
+	public DBSession openDBSession() throws Exception {
+		return new DBSession(dbSource.openConnection());
+	}
+
+	/*
+	 * 数据库增删改查的操作
+	 */
+//	public static class DBSession {
+	public class DBSession {
+		private Connection conn;// 数据库连接对象
+
+		public DBSession(Connection conn) {
+			this.conn = conn;
+		}
+
+//    	 查询所有数据  T代表泛型，可以替换成不同对象
+		public <T> List<T> list(Class<T> cls) throws Exception {
+			String sql = "select %s from %s";
+//    		生成查询字段的列表
+			StringBuilder columns = new StringBuilder();
+			Field[] fs = cls.getDeclaredFields();
+			for (int i = 0, len = fs.length; i < len; i++) {
+				columns.append(ORMAnnoHelper.getColumnName(fs[i]));
+				if (i != len - 1) {
+					columns.append(",");
+				}
+			}
+
+//    		生成完整的查询语句
+			sql = String.format(sql, columns.toString(), ORMAnnoHelper.getTableName(cls));
+			System.out.println("Statement SQL：\n" + sql);
+//    		创建执行sql的语句对象
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			
+//			多行数据的处理
+			List<T>list=listResultHandler(cls, rs);
+			
+			stmt.close();
+			return list;
+		}
+
+		public <T> T getById(Class<T>cls,Object id) throws Exception {  
+//			sql:select xxx,xxx from 表名 where {id}=？
+			Field idField = ORMAnnoHelper.findIdField(cls);
+			String where = ORMAnnoHelper.getColumnName(idField)+"=";
+//			idField.getType()可替换成id.getClass()
+			if(idField.getType()==String.class) {
+				where+="'"+id+"'";
+			}else {
+				where+=id;
+			}
+			String sql = String.format("select * from %s where %s",ORMAnnoHelper.getTableName(cls),where);
+			
+			System.out.println("Find by ID SQL:\n"+sql);
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+//          单行数据的结果处理
+			T t = oneResultHandler(cls, rs);
+			stmt.close();
+			return t;
+					
+		}
+		
+		private<T> T oneResultHandler(Class<T>cls,ResultSet rs) throws Exception{
+			T obj = null;
+			Field []fs = cls.getDeclaredFields();
+			if (rs.next()) {
+//    			实例化实体类对象
+				obj = cls.newInstance();
+//    			读取指定字段的数据并注入对应对象的属性上
+//    			判断字段的类型后,从查询结果集中获取不同类型的数据
+				for (Field f : fs) {
+					f.setAccessible(true);
+					Class<?> type = f.getType();
+					if (type == String.class) {
+						f.set(obj, rs.getString(ORMAnnoHelper.getColumnName(f)));
+					} else if (type == int.class || type == Integer.class) {
+						f.set(obj, rs.getInt(ORMAnnoHelper.getColumnName(f)));
+					} else if (type == double.class || type == Double.class) {
+						f.set(obj, rs.getDouble(ORMAnnoHelper.getColumnName(f)));
+					} else if (type == Date.class) {
+						f.set(obj, rs.getDate(ORMAnnoHelper.getColumnName(f)));
+					} else if (type == Float.class || type == float.class) {
+						f.set(obj, rs.getFloat(ORMAnnoHelper.getColumnName(f)));
+					}
+				}
+	
+			}
+			return obj;
+		}
+		
+		private<T> List<T> listResultHandler(Class<T>cls,ResultSet rs) throws Exception{
+			List<T> list = new ArrayList<>();
+			T obj = null;
+			Field []fs = cls.getDeclaredFields();
+			while (rs.next()) {
+//    			实例化实体类对象
+				obj = cls.newInstance();
+//    			读取指定字段的数据并注入对应对象的属性上
+//    			判断字段的类型后,从查询结果集中获取不同类型的数据
+				for (Field f : fs) {
+					f.setAccessible(true);
+					Class<?> type = f.getType();
+					if (type == String.class) {
+						f.set(obj, rs.getString(ORMAnnoHelper.getColumnName(f)));
+					} else if (type == int.class || type == Integer.class) {
+						f.set(obj, rs.getInt(ORMAnnoHelper.getColumnName(f)));
+					} else if (type == double.class || type == Double.class) {
+						f.set(obj, rs.getDouble(ORMAnnoHelper.getColumnName(f)));
+					} else if (type == Date.class) {
+						f.set(obj, rs.getDate(ORMAnnoHelper.getColumnName(f)));
+					} else if (type == Float.class || type == float.class) {
+						f.set(obj, rs.getFloat(ORMAnnoHelper.getColumnName(f)));
+					}
+				}
+//    			将实体对象添加到list
+				list.add(obj);
+			}
+			return list;
+		}
+		
+//    	 sql：插入一条记录
+		public int save(Object obj) throws Exception {
+
+			String sql = "insert %s(%s) values(%s)";
+			StringBuilder columns = new StringBuilder();
+			StringBuilder params = new StringBuilder();
+//   		 插入的字段集合
+			List<Field> insertFields = new ArrayList<>();
+			
+			Field[] fs = obj.getClass().getDeclaredFields();
+			for (int i = 0, len = fs.length; i < len; i++) {
+				columns.append(ORMAnnoHelper.getColumnName(fs[i]));
+				params.append("?");
+				if (i != len - 1) {
+					columns.append(",");
+					params.append(",");
+				}
+				insertFields.add(fs[i]);
+			}
+
+
+			sql = String.format(sql, ORMAnnoHelper.getTableName(obj.getClass()), columns.toString(), params.toString());
+			System.out.println("Insert SQL:\n" + sql);
+
+    		//创建预处理sql语句的对象
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+
+    		//设置预处理SQL语句的每个参数值：参数处理
+			
+			paramsHandler(obj,insertFields , pstmt);
+			
+
+			int rows = pstmt.executeUpdate();
+			pstmt.close();
+			return rows;
+		}
+
+		public int update(Object obj) throws Exception {
+			//sql:update 表名 set xx=?,xx=? where {id}=?
+			String sql = "update %s set %s where %s";
+			StringBuilder updateColumns = new StringBuilder();
+			String where = "";
+
+   		 //获取所有的对象字段
+			Field[] fs = obj.getClass().getDeclaredFields();
+   		 //更新的字段集合
+			List<Field> updaFields = new ArrayList<>();
+			Field f = null;
+			for (int i = 0, len = fs.length; i < len; i++) {
+				f = fs[i];
+			//判断字段是否为主键
+				if (ORMAnnoHelper.isId(f)) {
+					f.setAccessible(true);
+					where = ORMAnnoHelper.getColumnName(f) + "=";
+				//判断主键字段的类型
+					if (f.getType() == String.class) {
+						where += "'" + String.valueOf(f.get(obj)) + "'";
+					} else {
+						where += f.get(obj);
+					}
+					continue;
+				}
+				//非主键的处理
+				updateColumns.append(ORMAnnoHelper.getColumnName(f) + "=?");
+				if (i != len - 1) {
+					updateColumns.append(",");
+				}
+
+				updaFields.add(f);
+				f=null;
+			}
+
+
+			sql = String.format(sql, ORMAnnoHelper.getTableName(obj.getClass()), updateColumns.toString(), where);
+
+			System.out.println("update SQL:\n" + sql);
+			
+
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+
+			paramsHandler(obj, updaFields, pstmt);
+			
+			int rows = pstmt.executeUpdate();
+			pstmt.close();
+			return rows;
+
+		}
+		
+
+		//根据主键删除数据
+		public int delete(Class<?> cls,Object id) throws Exception {
+			Field idField = ORMAnnoHelper.findIdField(cls);
+			String where = ORMAnnoHelper.getColumnName(idField)+"=";
+			if(id.getClass()==String.class) {
+				where+="'"+id+"'";
+			}else {
+				where+=id;
+			}
+			Statement stmt = conn.createStatement();
+			System.out.println("开始删除操作");
+			int rows= stmt.executeUpdate("delete from "+ORMAnnoHelper.getTableName(cls)+" where "+where);
+			System.out.println("删除数据："+rows+"条。");
+			stmt.close();
+			return rows;
+			
+			
+		}
+
+		private void paramsHandler(Object obj, List<Field> fields,PreparedStatement pstmt) throws Exception {
+			Class<?> type = null;
+			Field f =null;
+			for(int i=0,len=fields.size();i<len;i++) {
+				f=fields.get(i);
+				f.setAccessible(true);
+				type=f.getType();
+				
+				if (type == String.class) {
+					pstmt.setString(i+1, String.valueOf(f.get(obj)));
+				} else if (type == int.class || type == Integer.class) {
+					pstmt.setInt(i+1, f.getInt(obj));
+				} else if (type == double.class || type == Double.class) {
+					pstmt.setDouble(i+1, f.getDouble(obj));
+				} else if (type == Date.class) {
+					Date date = (Date) f.get(obj);
+					pstmt.setDate(i+1,new java.sql.Date(date.getTime()) );
+				} else if (type == Float.class || type == float.class) {
+					pstmt.setFloat(i+1, f.getFloat(obj));
+				}else if (type == long.class || type == Long.class) {
+					pstmt.setLong(i+1, f.getLong(obj));
+				}
+				
+			}
+		}
+
+		public void close() {
+			if (null != conn) {
+				try {
+					conn.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					conn = null;
+				}
+			}
+
+		}
+
+		@SuppressWarnings("unchecked")
+		public <T> T find(T obj) {
+			String sql = "select * from %s where %s";
+			StringBuilder wheres = new StringBuilder();
+			List<Field>whereFields = new ArrayList<>();
+			
+			for (Field f : obj.getClass().getDeclaredFields()) {
+				f.setAccessible(true);
+				try {
+					if(f.get(obj)==null)continue;
+					wheres.append(f.getName()).append("=? AND ");
+					whereFields.add(f);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			wheres.append("1=1");
+			sql= String.format(sql, ORMAnnoHelper.getTableName(obj.getClass()),wheres.toString());
+			System.out.println("select one sql: \n" + sql);
+			PreparedStatement pstmt = null;
+			try {
+				pstmt=conn.prepareStatement(sql);
+				paramsHandler(obj, whereFields, pstmt);//解析预处理语句中？的参数并赋值
+				return (T)oneResultHandler(obj.getClass(), pstmt.executeQuery());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}finally {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+			
+			return null;
+		}
+	}
+
+	public static void main(String[] args) {
+		DBSessionFactory factory = new DBSessionFactory();
+		try {
+			DBSession session = factory.openDBSession();
+			List<User> list = session.list(User.class);
+			System.out.println("查询到" + list.size() + "条记录，具体为：" + list);
+
+
+			
+			
+			User user = new User();
+			user.setUsername("张三");
+			user.setPassword("1234");
+			User user1 = session.find(user);
+			System.out.println(user1);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}

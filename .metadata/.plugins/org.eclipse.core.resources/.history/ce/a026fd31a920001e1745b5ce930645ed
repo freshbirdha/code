@@ -1,0 +1,7 @@
+package userAction;
+
+import mvcAction.SupportAction;
+
+public class RegisteAction extends SupportAction {
+	
+}

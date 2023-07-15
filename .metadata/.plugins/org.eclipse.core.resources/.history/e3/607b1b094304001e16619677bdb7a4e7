@@ -1,0 +1,12 @@
+package reflection;
+
+public class TestDemo1 {
+
+	public static void main(String[] args) throws Exception {
+		//获取Class类
+		Class c1 = Person.class;
+		Class c2 = new Person().getClass();
+		Class c3 = Class.forName("reflection.Person");
+	}
+
+}
